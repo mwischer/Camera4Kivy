@@ -23,6 +23,7 @@ from . import CameraBase
 import signal
 import subprocess
 import prctl
+import logging
 
 # Libcamera defaults to INFO, too verbose
 environ['LIBCAMERA_LOG_LEVELS'] = 'ERROR'
@@ -332,24 +333,30 @@ class CameraPi2():
 
     def capture_file(self, file_output, callback):
         request = self.picam2.capture_request()
-        size = request.config['main']['size']
-        with _MappedBuffer(request,'main') as pixels:
-            img = Image.frombytes('RGB', size, bytes(pixels))
+        request.save('main', file_output, format=None)
+        result = request.get_metadata()
         request.release()
-        if self._rotate in [90,270]:
-            size = size[::-1]
-        crop = self._context.crop_for_aspect_orientation(size[0],
-                                                         size[1])
-        if self._rotate in [90,270]:
-            t = crop[2]
-            crop[2] = crop[3]
-            crop[3] = t
-        bottom = crop[3] - crop[1]
-        right = crop[2] + crop[0]
-        img = img.crop((crop[0], crop[1], right, bottom))
-        img = img.rotate(self._rotate, expand = True)
-        with open(file_output, 'wb') as fp:
-            img.save(fp)
+        logging.info(f"C4K: {result}")
+
+        #size = request.config['main']['size']
+        #with _MappedBuffer(request, 'main') as pixels:
+        #    img = Image.frombytes('RGB', size, bytes(pixels))
+        #request.release()
+        #logging.info(f"C4K: {img}")
+        #if self._rotate in [90,270]:
+        #    size = size[::-1]
+        #crop = self._context.crop_for_aspect_orientation(size[0],
+        #                                                 size[1])
+        #if self._rotate in [90,270]:
+        #    t = crop[2]
+        #    crop[2] = crop[3]
+        #    crop[3] = t
+        #bottom = crop[3] - crop[1]
+        #right = crop[2] + crop[0]
+        #img = img.crop((crop[0], crop[1], right, bottom))
+        #img = img.rotate(self._rotate, expand = True)
+        #with open(file_output, 'wb') as fp:
+        #    img.save(fp)
         if callback:
             callback(file_output)
             
