@@ -195,7 +195,7 @@ class CameraPi2():
         self.picam2.configure(self.preview_config)
         self.sensor= SensorInterface()
         self.sensor.start(self.picam2)
-        self.picam2.attach_preview(self.sensor)
+        #self.picam2.attach_preview(self.sensor)
         self.base_scaler_crop = self.crop_limits
         self.scaler_crop = self.crop_limits
         self.picam2.start()
@@ -216,7 +216,7 @@ class CameraPi2():
                 fps = m['fps']
                 size = m['size']
                 bits = m['bit_depth']
-                if fps >= self._framerate and bits == 8:   
+                if fps >= self._framerate:   
                     if not wide and size[0]/size[1] < 1.5:
                         if size[0] > size_s[0]:
                             size_s = size
@@ -228,7 +228,7 @@ class CameraPi2():
 
         if not size_s[0]:
             Logger.error('No sensor found in supporting ' +\
-                         self.aspect_ratio + ' and ' +\
+                         self._context.aspect_ratio + ' and ' +\
                          str(self._framerate) + ' fps.')
             return
 
